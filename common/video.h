@@ -62,6 +62,7 @@ void Toggle_Video_Fullscreen();
 void Reset_Video_Mode();
 unsigned Get_Free_Video_Memory();
 void Wait_Blit();
+void SysMessageBox(const char* title, const char* message);
 
 /*
 ** Set desired cursor image in game palette.

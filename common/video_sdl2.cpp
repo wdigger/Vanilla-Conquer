@@ -848,3 +848,8 @@ VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
 {
     return new VideoSurfaceSDL2(w, h, flags);
 }
+
+void SysMessageBox(const char* title, const char* message)
+{
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, window);
+}

@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 #ifdef _WIN32
 
     if (strstr(command_line, "f:\\projects\\c&c0") != NULL || strstr(command_line, "F:\\PROJECTS\\C&C0") != NULL) {
-        MessageBoxA(0, "Playing off of the network is not allowed.", "Red Alert", MB_OK | MB_ICONSTOP);
+        SysMessageBox("Red Alert", "Playing off of the network is not allowed.");
         return (EXIT_FAILURE);
     }
 
@@ -573,9 +573,7 @@ bool InitDDraw(void)
     }
 
     if (!video_success) {
-#ifdef _WIN32
-        MessageBoxA(MainWindow, TEXT_VIDEO_ERROR, TEXT_SHORT_TITLE, MB_ICONEXCLAMATION | MB_OK);
-#endif
+        SysMessageBox(TEXT_SHORT_TITLE, TEXT_VIDEO_ERROR);
         return false;
     }
 
@@ -590,9 +588,7 @@ bool InitDDraw(void)
             /* Aaaarrgghh! */
             WWDebugString(TEXT_DDRAW_ERROR);
             WWDebugString("\n");
-#ifdef _WIN32
-            MessageBoxA(MainWindow, TEXT_DDRAW_ERROR, TEXT_SHORT_TITLE, MB_ICONEXCLAMATION | MB_OK);
-#endif
+            SysMessageBox(TEXT_SHORT_TITLE, TEXT_DDRAW_ERROR);
             return false;
         }
 

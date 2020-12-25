@@ -1355,3 +1355,8 @@ VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
 {
     return new VideoSurfaceDDraw(w, h, flags);
 }
+
+void SysMessageBox(const char* title, const char* message)
+{
+    MessageBoxA(MainWindow, message, title, MB_ICONEXCLAMATION | MB_OK);
+}
