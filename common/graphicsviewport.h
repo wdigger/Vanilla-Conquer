@@ -241,7 +241,7 @@ public:
     long To_Buffer(int x, int y, int w, int h, void* buff, long size);
     long To_Buffer(int x, int y, int w, int h, BufferClass* buff);
     long To_Buffer(BufferClass* buff);
-    bool Blit(GraphicViewPortClass& dest,
+    void Blit(GraphicViewPortClass& dest,
               int x_pixel,
               int y_pixel,
               int dx_pixel,
@@ -249,10 +249,10 @@ public:
               int pixel_width,
               int pixel_height,
               bool trans = false);
-    bool Blit(GraphicViewPortClass& dest, int dx, int dy, bool trans = false);
-    bool Blit(GraphicViewPortClass& dest, bool trans = false);
+    void Blit(GraphicViewPortClass& dest, int dx, int dy, bool trans = false);
+    void Blit(GraphicViewPortClass& dest, bool trans = false);
     void Blit(void* buffer, int x, int y, int w, int h);
-    bool Scale(GraphicViewPortClass& dest,
+    void Scale(GraphicViewPortClass& dest,
                int src_x,
                int src_y,
                int dst_x,
@@ -263,7 +263,7 @@ public:
                int dst_h,
                bool trans = false,
                char* remap = nullptr);
-    bool Scale(GraphicViewPortClass& dest,
+    void Scale(GraphicViewPortClass& dest,
                int src_x,
                int src_y,
                int dst_x,
@@ -273,8 +273,8 @@ public:
                int dst_w,
                int dst_h,
                char* remap);
-    bool Scale(GraphicViewPortClass& dest, bool trans = false, char* remap = nullptr);
-    bool Scale(GraphicViewPortClass& dest, char* remap);
+    void Scale(GraphicViewPortClass& dest, bool trans = false, char* remap = nullptr);
+    void Scale(GraphicViewPortClass& dest, char* remap);
     unsigned long Print(char const* string, int x_pixel, int y_pixel, int fcolor, int bcolor);
     unsigned long Print(short num, int x_pixel, int y_pixel, int fcol, int bcol);
     unsigned long Print(int num, int x_pixel, int y_pixel, int fcol, int bcol);
@@ -319,7 +319,7 @@ public:
     }
 
     // Member to blit using direct draw access to hardware blitter
-    bool DD_Linear_Blit_To_Linear(GraphicViewPortClass& dest,
+    void DD_Linear_Blit_To_Linear(GraphicViewPortClass& dest,
                                   int source_x,
                                   int source_y,
                                   int dest_x,
@@ -347,7 +347,28 @@ protected:
     GraphicBufferClass* GraphicBuff; // related graphic buff
     bool IsHardware;                 // Flag to let us know if it is a direct draw surface
     int LockCount;                   // Count for stacking locks if non-zero the buffer
-};                                   //   is a locked DD surface
+                                     //   is a locked DD surface
+
+    void Linear_Blit_To_Linear(GraphicViewPortClass* dst_vp,
+                               int src_x,
+                               int src_y,
+                               int dst_x,
+                               int dst_y,
+                               int w,
+                               int h,
+                               int use_key);
+    void Linear_Scale_To_Linear(GraphicViewPortClass* dst_vp,
+                                int src_x,
+                                int src_y,
+                                int dst_x,
+                                int dst_y,
+                                int src_width,
+                                int src_height,
+                                int dst_width,
+                                int dst_height,
+                                bool trans,
+                                char* remap);
+};
 
 extern GraphicViewPortClass* LogicPage;
 

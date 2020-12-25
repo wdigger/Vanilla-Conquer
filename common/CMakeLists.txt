@@ -52,7 +52,6 @@ set(COMMON_SRC
     lcw.cpp
     lcwpipe.cpp
     lcwstraw.cpp
-    linear.cpp
     link.cpp
     load.cpp
     memrev.cpp

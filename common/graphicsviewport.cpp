@@ -47,10 +47,11 @@
 
 #include "buffer.h"
 #include "drawbuff.h"
-#include "linear.h"
 #include "rect.h"
 #include "gbuffer.h"
 #include "ww_win.h"
+
+#include <string.h>
 
 // int	CacheAllowed;
 
@@ -299,7 +300,7 @@ extern void Colour_Debug(int call_number);
  *   09-22-95 11:05am ST : Created                                                             *
  *=============================================================================================*/
 
-bool GraphicViewPortClass::DD_Linear_Blit_To_Linear(GraphicViewPortClass& dest,
+void GraphicViewPortClass::DD_Linear_Blit_To_Linear(GraphicViewPortClass& dest,
                                                     int source_x,
                                                     int source_y,
                                                     int dest_x,
@@ -322,8 +323,6 @@ bool GraphicViewPortClass::DD_Linear_Blit_To_Linear(GraphicViewPortClass& dest,
     dest_rectangle.Height = height;
 
     dest.GraphicBuff->Get_DD_Surface()->Blt(dest_rectangle, GraphicBuff->Get_DD_Surface(), source_rectangle, mask);
-
-    return true;
 }
 
 /***********************************************************************************************
@@ -522,7 +521,7 @@ long GraphicViewPortClass::To_Buffer(BufferClass* buff)
  * HISTORY:                                                                *
  *   01/06/1995 PWG : Created.                                             *
  *=========================================================================*/
-bool GraphicViewPortClass::Blit(GraphicViewPortClass& dest,
+void GraphicViewPortClass::Blit(GraphicViewPortClass& dest,
                                 int x_pixel,
                                 int y_pixel,
                                 int dx_pixel,
@@ -531,29 +530,24 @@ bool GraphicViewPortClass::Blit(GraphicViewPortClass& dest,
                                 int pixel_height,
                                 bool trans)
 {
-    bool return_code = false;
-
     if (IsHardware && dest.IsHardware) {
-        return (DD_Linear_Blit_To_Linear(dest,
-                                         XPos + x_pixel,
-                                         YPos + y_pixel,
-                                         dest.Get_XPos() + dx_pixel,
-                                         dest.Get_YPos() + dy_pixel,
-                                         pixel_width,
-                                         pixel_height,
-                                         trans));
+        DD_Linear_Blit_To_Linear(dest,
+                                 XPos + x_pixel,
+                                 YPos + y_pixel,
+                                 dest.Get_XPos() + dx_pixel,
+                                 dest.Get_YPos() + dy_pixel,
+                                 pixel_width,
+                                 pixel_height,
+                                 trans);
     } else {
         if (Lock()) {
             if (dest.Lock()) {
-                return_code = (Linear_Blit_To_Linear(
-                    this, &dest, x_pixel, y_pixel, dx_pixel, dy_pixel, pixel_width, pixel_height, trans));
+                Linear_Blit_To_Linear(&dest, x_pixel, y_pixel, dx_pixel, dy_pixel, pixel_width, pixel_height, trans);
                 dest.Unlock();
             }
             Unlock();
         }
     }
-
-    return (return_code);
 }
 
 /***************************************************************************
@@ -568,24 +562,19 @@ bool GraphicViewPortClass::Blit(GraphicViewPortClass& dest,
  * HISTORY:                                                                *
  *   01/06/1995 PWG : Created.                                             *
  *=========================================================================*/
-bool GraphicViewPortClass::Blit(GraphicViewPortClass& dest, int dx, int dy, bool trans)
+void GraphicViewPortClass::Blit(GraphicViewPortClass& dest, int dx, int dy, bool trans)
 {
-    bool return_code = false;
-
     if (IsHardware && dest.IsHardware) {
-        return (DD_Linear_Blit_To_Linear(
-            dest, XPos, YPos, dest.Get_XPos() + dx, dest.Get_YPos() + dy, Width, Height, trans));
+        DD_Linear_Blit_To_Linear(dest, XPos, YPos, dest.Get_XPos() + dx, dest.Get_YPos() + dy, Width, Height, trans);
     } else {
         if (Lock()) {
             if (dest.Lock()) {
-                return_code = (Linear_Blit_To_Linear(this, &dest, 0, 0, dx, dy, Width, Height, trans));
+                Linear_Blit_To_Linear(&dest, 0, 0, dx, dy, Width, Height, trans);
                 dest.Unlock();
             }
             Unlock();
         }
     }
-
-    return (return_code);
 }
 
 /***************************************************************************
@@ -600,30 +589,26 @@ bool GraphicViewPortClass::Blit(GraphicViewPortClass& dest, int dx, int dy, bool
  * HISTORY:                                                                *
  *   01/06/1995 PWG : Created.                                             *
  *=========================================================================*/
-bool GraphicViewPortClass::Blit(GraphicViewPortClass& dest, bool trans)
+void GraphicViewPortClass::Blit(GraphicViewPortClass& dest, bool trans)
 {
-    bool return_code = false;
-
     if (IsHardware && dest.IsHardware) {
-        return (DD_Linear_Blit_To_Linear(dest,
-                                         XPos,
-                                         YPos,
-                                         dest.Get_XPos(),
-                                         dest.Get_YPos(),
-                                         MAX(Width, dest.Get_Width()),
-                                         MAX(Height, dest.Get_Height()),
-                                         trans));
+        DD_Linear_Blit_To_Linear(dest,
+                                 XPos,
+                                 YPos,
+                                 dest.Get_XPos(),
+                                 dest.Get_YPos(),
+                                 MAX(Width, dest.Get_Width()),
+                                 MAX(Height, dest.Get_Height()),
+                                 trans);
     } else {
         if (Lock()) {
             if (dest.Lock()) {
-                return_code = (Linear_Blit_To_Linear(this, &dest, 0, 0, 0, 0, Width, Height, trans));
+                Linear_Blit_To_Linear(&dest, 0, 0, 0, 0, Width, Height, trans);
                 dest.Unlock();
             }
             Unlock();
         }
     }
-
-    return (return_code);
 }
 
 void GraphicViewPortClass::Blit(void* buffer, int x, int y, int w, int h)
@@ -646,7 +631,7 @@ void GraphicViewPortClass::Blit(void* buffer, int x, int y, int w, int h)
  * HISTORY:                                                                *
  *   01/06/1995 PWG : Created.                                             *
  *=========================================================================*/
-bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
+void GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
                                  int src_x,
                                  int src_y,
                                  int dst_x,
@@ -658,16 +643,13 @@ bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
                                  bool trans,
                                  char* remap)
 {
-    bool return_code = false;
     if (Lock()) {
         if (dest.Lock()) {
-            return_code = (Linear_Scale_To_Linear(
-                this, &dest, src_x, src_y, dst_x, dst_y, src_w, src_h, dst_w, dst_h, trans, remap));
+            Linear_Scale_To_Linear(&dest, src_x, src_y, dst_x, dst_y, src_w, src_h, dst_w, dst_h, trans, remap);
             dest.Unlock();
         }
         Unlock();
     }
-    return (return_code);
 }
 
 /***************************************************************************
@@ -682,7 +664,7 @@ bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
  * HISTORY:                                                                *
  *   01/06/1995 PWG : Created.                                             *
  *=========================================================================*/
-bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
+void GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
                                  int src_x,
                                  int src_y,
                                  int dst_x,
@@ -693,16 +675,13 @@ bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
                                  int dst_h,
                                  char* remap)
 {
-    bool return_code = false;
     if (Lock()) {
         if (dest.Lock()) {
-            return_code = (Linear_Scale_To_Linear(
-                this, &dest, src_x, src_y, dst_x, dst_y, src_w, src_h, dst_w, dst_h, false, remap));
+            Linear_Scale_To_Linear(&dest, src_x, src_y, dst_x, dst_y, src_w, src_h, dst_w, dst_h, 0, remap);
             dest.Unlock();
         }
         Unlock();
     }
-    return (return_code);
 }
 
 /***************************************************************************
@@ -717,18 +696,15 @@ bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest,
  * HISTORY:                                                                *
  *   01/06/1995 PWG : Created.                                             *
  *=========================================================================*/
-bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest, bool trans, char* remap)
+void GraphicViewPortClass::Scale(GraphicViewPortClass& dest, bool trans, char* remap)
 {
-    bool return_code = false;
     if (Lock()) {
         if (dest.Lock()) {
-            return_code = (Linear_Scale_To_Linear(
-                this, &dest, 0, 0, 0, 0, Width, Height, dest.Get_Width(), dest.Get_Height(), trans, remap));
+            Linear_Scale_To_Linear(&dest, 0, 0, 0, 0, Width, Height, dest.Get_Width(), dest.Get_Height(), trans, remap);
             dest.Unlock();
         }
         Unlock();
     }
-    return (return_code);
 }
 
 /***************************************************************************
@@ -743,18 +719,15 @@ bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest, bool trans, char* r
  * HISTORY:                                                                *
  *   01/06/1995 PWG : Created.                                             *
  *=========================================================================*/
-bool GraphicViewPortClass::Scale(GraphicViewPortClass& dest, char* remap)
+void GraphicViewPortClass::Scale(GraphicViewPortClass& dest, char* remap)
 {
-    bool return_code = false;
     if (Lock()) {
         if (dest.Lock()) {
-            return_code = (Linear_Scale_To_Linear(
-                this, &dest, 0, 0, 0, 0, Width, Height, dest.Get_Width(), dest.Get_Height(), false, remap));
+            Linear_Scale_To_Linear(&dest, 0, 0, 0, 0, Width, Height, dest.Get_Width(), dest.Get_Height(), false, remap);
             dest.Unlock();
         }
         Unlock();
     }
-    return (return_code);
 }
 
 /***************************************************************************
@@ -1003,4 +976,224 @@ void GraphicViewPortClass::Draw_Rect(int x1_pixel, int y1_pixel, int x2_pixel, i
     Draw_Line(x1_pixel, y1_pixel, x1_pixel, y2_pixel, color);
     Draw_Line(x2_pixel, y1_pixel, x2_pixel, y2_pixel, color);
     Unlock();
+}
+
+void GraphicViewPortClass::Linear_Blit_To_Linear(GraphicViewPortClass* dst_vp,
+                                                 int src_x,
+                                                 int src_y,
+                                                 int dst_x,
+                                                 int dst_y,
+                                                 int w,
+                                                 int h,
+                                                 int use_key)
+{
+    unsigned char* src = (unsigned char*)Offset;
+    unsigned char* dst = (unsigned char*)(dst_vp->Offset);
+    int src_pitch = (Pitch + XAdd + Width);
+    int dst_pitch = (dst_vp->Pitch + dst_vp->XAdd + dst_vp->Width);
+
+    if (src_x >= Width || src_y >= Height || dst_x >= dst_vp->Width || dst_y >= dst_vp->Height || h < 0 || w < 1) {
+        return;
+    }
+
+    src_x = MAX(0, src_x);
+    src_y = MAX(0, src_y);
+    dst_x = MAX(0, dst_x);
+    dst_y = MAX(0, dst_y);
+
+    h = (dst_y + h) > dst_vp->Height ? dst_vp->Height - 1 - dst_y : h;
+    w = (dst_x + w) > dst_vp->Width ? dst_vp->Width - 1 - dst_x : w;
+
+    // move our pointers to the start locations
+    src += src_x + src_y * src_pitch;
+    dst += dst_x + dst_y * dst_pitch;
+
+    // If src is before dst, we run the risk of overlapping memory regions so we
+    // need to move src and dst to the last line and work backwards
+    if (src < dst) {
+        unsigned char* esrc = src + (h - 1) * src_pitch;
+        unsigned char* edst = dst + (h - 1) * dst_pitch;
+        if (use_key) {
+            char key_colour = 0;
+            while (h-- != 0) {
+                // Can't optimize as we need to check every pixel against key colour :(
+                for (int i = w - 1; i >= 0; --i) {
+                    if (esrc[i] != key_colour) {
+                        edst[i] = esrc[i];
+                    }
+                }
+
+                edst -= dst_pitch;
+                esrc -= src_pitch;
+            }
+        } else {
+            while (h-- != 0) {
+                memmove(edst, esrc, w);
+                edst -= dst_pitch;
+                esrc -= src_pitch;
+            }
+        }
+    } else {
+        if (use_key) {
+            unsigned char key_colour = 0;
+            while (h-- != 0) {
+                // Can't optimize as we need to check every pixel against key colour :(
+                for (int i = 0; i < w; ++i) {
+                    if (src[i] != key_colour) {
+                        dst[i] = src[i];
+                    }
+                }
+
+                dst += dst_pitch;
+                src += src_pitch;
+            }
+        } else {
+            while (h-- != 0) {
+                memmove(dst, src, w);
+                dst += dst_pitch;
+                src += src_pitch;
+            }
+        }
+    }
+}
+
+// Note that this function does not generate pixel perfect results when compared to the ASM implementation
+// It should not generate anything that is visibly different without doing side byt side comparisons however.
+void GraphicViewPortClass::Linear_Scale_To_Linear(GraphicViewPortClass* dst_vp,
+                                                  int src_x,
+                                                  int src_y,
+                                                  int dst_x,
+                                                  int dst_y,
+                                                  int src_width,
+                                                  int src_height,
+                                                  int dst_width,
+                                                  int dst_height,
+                                                  bool trans,
+                                                  char* remap)
+{
+    // If there is nothing to scale, just return.
+    if (src_width <= 0 || src_height <= 0 || dst_width <= 0 || dst_height <= 0) {
+        return;
+    }
+
+    int src_x0 = src_x;
+    int src_y0 = src_y;
+    int dst_x0 = dst_x;
+    int dst_y0 = dst_y;
+    int dst_x1 = dst_width + dst_x;
+    int dst_y1 = dst_height + dst_y;
+
+    // These ifs are all for clipping purposes incase coords are outside
+    // the expected area.
+    if (src_x < 0) {
+        src_x0 = 0;
+        dst_x0 = dst_x + ((dst_width * -src_x) / src_width);
+    }
+
+    if (src_y < 0) {
+        src_y0 = 0;
+        dst_y0 = dst_y + ((dst_height * -src_y) / src_height);
+    }
+
+    if (src_x + src_width > Get_Width() + 1) {
+        dst_x1 = dst_x + (dst_width * (Get_Width() - src_x) / src_width);
+    }
+
+    if (src_y + src_height > Get_Height() + 1) {
+        dst_y1 = dst_y + (dst_height * (Get_Height() - src_y) / src_height);
+    }
+
+    if (dst_x0 < 0) {
+        dst_x0 = 0;
+        src_x0 = src_x + ((src_width * -dst_x) / dst_width);
+    }
+
+    if (dst_y0 < 0) {
+        dst_y0 = 0;
+        src_y0 = src_y + ((src_height * -dst_y) / dst_height);
+    }
+
+    if (dst_x1 > dst_vp->Get_Width() + 1) {
+        dst_x1 = dst_vp->Get_Width();
+    }
+
+    if (dst_y1 > dst_vp->Get_Height() + 1) {
+        dst_y1 = dst_vp->Get_Height();
+    }
+
+    if (dst_y0 > dst_y1 || dst_x0 > dst_x1) {
+        return;
+    }
+
+    char* src = src_y0 * (Get_Pitch() + Get_XAdd() + Get_Width()) + src_x0 + reinterpret_cast<char*>(Get_Offset());
+    char* dst = dst_y0 * (dst_vp->Get_Pitch() + dst_vp->Get_XAdd() + dst_vp->Get_Width()) + dst_x0
+                + reinterpret_cast<char*>(dst_vp->Get_Offset());
+    dst_x1 -= dst_x0;
+    dst_y1 -= dst_y0;
+    int x_ratio = ((src_width << 16) / dst_x1) + 1;
+    int y_ratio = ((src_height << 16) / dst_y1) + 1;
+
+    // trans basically means do we skip index 0 entries, thus treating them as
+    // transparent?
+    if (trans) {
+        if (remap != nullptr) {
+            for (int i = 0; i < dst_y1; ++i) {
+                char* d = dst + i * (dst_vp->Get_Pitch() + dst_vp->Get_XAdd() + dst_vp->Get_Width());
+                char* s = src + ((i * y_ratio) >> 16) * (Get_Pitch() + Get_XAdd() + Get_Width());
+                int xrat = 0;
+
+                for (int j = 0; j < dst_x1; ++j) {
+                    char tmp = s[xrat >> 16];
+
+                    if (tmp != 0) {
+                        *d = (remap)[tmp];
+                    }
+
+                    ++d;
+                    xrat += x_ratio;
+                }
+            }
+        } else {
+            for (int i = 0; i < dst_y1; ++i) {
+                char* d = dst + i * (dst_vp->Get_Pitch() + dst_vp->Get_XAdd() + dst_vp->Get_Width());
+                char* s = src + ((i * y_ratio) >> 16) * (Get_Pitch() + Get_XAdd() + Get_Width());
+                int xrat = 0;
+
+                for (int j = 0; j < dst_x1; ++j) {
+                    char tmp = s[xrat >> 16];
+
+                    if (tmp != 0) {
+                        *d = tmp;
+                    }
+
+                    ++d;
+                    xrat += x_ratio;
+                }
+            }
+        }
+    } else {
+        if (remap != nullptr) {
+            for (int i = 0; i < dst_y1; ++i) {
+                char* d = dst + i * (dst_vp->Get_Pitch() + dst_vp->Get_XAdd() + dst_vp->Get_Width());
+                char* s = src + ((i * y_ratio) >> 16) * (Get_Pitch() + Get_XAdd() + Get_Width());
+                int xrat = 0;
+
+                for (int j = 0; j < dst_x1; ++j) {
+                    *d++ = (remap)[s[xrat >> 16]];
+                    xrat += x_ratio;
+                }
+            }
+        } else {
+            for (int i = 0; i < dst_y1; ++i) {
+                char* d = dst + i * (dst_vp->Get_Pitch() + dst_vp->Get_XAdd() + dst_vp->Get_Width());
+                char* s = src + ((i * y_ratio) >> 16) * (Get_Pitch() + Get_XAdd() + Get_Width());
+                int xrat = 0;
+
+                for (int j = 0; j < dst_x1; ++j) {
+                    *d++ = s[xrat >> 16];
+                    xrat += x_ratio;
+                }
+            }
+        }
+    }
 }
