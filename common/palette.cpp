@@ -17,24 +17,23 @@
  **   C O N F I D E N T I A L --- W E S T W O O D   A S S O C I A T E S   **
  ***************************************************************************
  *                                                                         *
- *                 Project Name : WWLIB												*
+ *                 Project Name : WWLIB                                    *
  *                                                                         *
- *                    File Name : PALETTE.C											*
+ *                    File Name : PALETTE.C                                *
  *                                                                         *
- *                   Programmer : BILL STOKES										*
+ *                   Programmer : BILL STOKES                              *
  *                                                                         *
- *                   Start Date : 6/20/91												*
+ *                   Start Date : 6/20/91                                  *
  *                                                                         *
  *                  Last Update : August 2, 1994   [SKB]                   *
  *                                                                         *
  *-------------------------------------------------------------------------*
- * Note: This module contains dependencies upon the video system,				*
- * specifically Get_Video_Mode().														*
+ * Note: This module contains dependencies upon the video system,          *
+ * specifically Get_Video_Mode().                                          *
  *-------------------------------------------------------------------------*
  * Functions:                                                              *
- *   Set_Palette -- sets the current palette											*
- *   Set_Palette_Color -- Set a color number in a palette to the data.     *
- *	  Fade_Palette_To -- Fades the current palette into another					*
+ *   Set_Palette -- sets the current palette                               *
+ *   Fade_Palette_To -- Fades the current palette into another             *
  *   Determine_Bump_Rate -- determines desired bump rate for fading        *
  *   Bump_Palette -- increments the palette one step, for fading           *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -43,8 +42,11 @@
 */
 
 #include "palette.h"
-#include "timer.h"
 
+#include "timer.h"
+#include "video.h"
+
+#include <algorithm>
 #include <string.h>
 
 /*
@@ -54,7 +56,7 @@
 /*
 ********************************** Globals **********************************
 */
-extern unsigned char CurrentPalette[768]; /* in pal.asm */
+unsigned char CurrentPalette[PALETTE_BYTES] = {255};
 
 /*
 ******************************** Prototypes *********************************
@@ -67,14 +69,24 @@ static bool Bump_Palette(void* palette1, unsigned int step);
 ******************************** Code *********************************
 */
 
+void Set_Palette_Range(void* palette)
+{
+    if (palette == NULL) {
+        return;
+    }
+
+    memcpy(CurrentPalette, palette, PALETTE_BYTES);
+    Set_DD_Palette(palette);
+}
+
 /***************************************************************************
- * Set_Palette -- sets the current palette											*
+ * Set_Palette -- sets the current palette                                 *
  *                                                                         *
  * INPUT:                                                                  *
- *		void *palette		- palette to set												*
+ *     void *palette   - palette to set                                    *
  *                                                                         *
  * OUTPUT:                                                                 *
- *		none																						*
+ *     none                                                                *
  *                                                                         *
  * WARNINGS:                                                               *
  *                                                                         *
@@ -88,48 +100,15 @@ void Set_Palette(void* palette)
 } /* end of Set_Palette */
 
 /***************************************************************************
- * Set_Palette_Color -- Set a color number in a palette to the data.       *
+ *	Fade_Palette_To -- Fades the current palette into another              *
  *                                                                         *
+ * This will allow the palette to fade from current palette into the       *
+ * palette that was passed in.  This can be used to fade in and fade out.  *
  *                                                                         *
  * INPUT:                                                                  *
- *		void *palette	- palette to set color in										*
- *		int color		- which color index to set										*
- *		void *data		- RGB data for color												*
- *                                                                         *
- * OUTPUT:                                                                 *
- *		none																						*
- *                                                                         *
- * WARNINGS:                                                               *
- *                                                                         *
- * HISTORY:                                                                *
- *   04/25/1994 SKB : Created.                                             *
- *   04/27/1994 BR : Converted to 32-bit                                   *
- *=========================================================================*/
-void Set_Palette_Color(void* palette, int color, void* data)
-{
-    /*
-    ---------------------- Return if 'palette' is NULL -----------------------
-    */
-    if (!palette)
-        return;
-
-    /*
-------------------- Change the color & set the palette -------------------
-*/
-    memcpy(&((unsigned char*)palette)[color * RGB_BYTES], data, RGB_BYTES);
-    Set_Palette_Range(palette);
-} /* end of Set_Palette */
-
-/***************************************************************************
- *	Fade_Palette_To -- Fades the current palette into another					*
- *                                                                         *
- * This will allow the palette to fade from current palette into the 		*
- * palette that was passed in.  This can be used to fade in and fade out.	*
- *                                                                         *
- * INPUT:      																				*
- *    char  *palette1 - this is the palette to fade to.           			*
- *		unsigned int delay		 -	fade with this timer count down							*
- *		void *callback  - user-defined callback function							*
+ *    char  *palette1 - this is the palette to fade to.                    *
+ *    unsigned int delay - fade with this timer count down                 *
+ *    void *callback  - user-defined callback function                     *
  *                                                                         *
  * OUTPUT:     none                                                        *
  *                                                                         *
@@ -198,13 +177,13 @@ void Fade_Palette_To(void* palette1, unsigned int delay, void (*callback)())
  * Determine_Bump_Rate -- determines desired bump rate for fading          *
  *                                                                         *
  * INPUT:                                                                  *
- *		unsigned char *palette	- palette to fade to												*
- *		int delay		- desired time delay in 60ths of a second					*
- *		short *ticks		- output: loop ticks per color jump							*
- *		short *rate		- output: color gun increment rate							*
+ *      unsigned char *palette  - palette to fade to                       *
+ *      int delay       - desired time delay in 60ths of a second          *
+ *      short *ticks    - output: loop ticks per color jump                *
+ *      short *rate     - output: color gun increment rate                 *
  *                                                                         *
  * OUTPUT:                                                                 *
- *		none																						*
+ *      none                                                               *
  *                                                                         *
  * WARNINGS:                                                               *
  *                                                                         *
@@ -229,8 +208,8 @@ static void Determine_Bump_Rate(void* palette, int delay, short* ticks, short* r
     for (index = 0; index < PALETTE_BYTES; index++) {
         gun1 = ((unsigned char*)palette)[index];
         gun2 = CurrentPalette[index];
-        adiff = ABS(gun1 - gun2);
-        diff = MAX(diff, adiff);
+        adiff = std::abs(gun1 - gun2);
+        diff = std::max(diff, adiff);
     }
 
     /*------------------------------------------------------------------------
@@ -244,7 +223,7 @@ static void Determine_Bump_Rate(void* palette, int delay, short* ticks, short* r
     t = ((long)delay) << 8;
     if (diff) {
         t /= diff;
-        t = MIN((long)t, (long)0x7FFF);
+        t = std::min((long)t, (long)0x7FFF);
     }
     *ticks = (short)t;
 
@@ -266,11 +245,11 @@ static void Determine_Bump_Rate(void* palette, int delay, short* ticks, short* r
  * Bump_Palette -- increments the palette one step, for fading             *
  *                                                                         *
  * INPUT:                                                                  *
- *		palette1		- palette to fade towards											*
- *		step			- max step amount, determined by Determine_Bump_Rate		*
+ *      palette1   - palette to fade towards                               *
+ *      step       - max step amount, determined by Determine_Bump_Rate    *
  *                                                                         *
  * OUTPUT:                                                                 *
- *		false = no change, true = changed												*
+ *      false = no change, true = changed                                  *
  *                                                                         *
  * WARNINGS:                                                               *
  *                                                                         *
@@ -294,7 +273,7 @@ static bool Bump_Palette(void* palette1, unsigned int step)
     /*
     ------------------------ Copy the current palette ------------------------
     */
-    memcpy(palette, CurrentPalette, 768);
+    memcpy(palette, CurrentPalette, PALETTE_BYTES);
 
     /*
     ----------------------- Loop through palette bytes -----------------------
@@ -316,14 +295,14 @@ static bool Bump_Palette(void* palette1, unsigned int step)
         */
         if (gun2 < gun1) {
             gun2 += step;
-            gun2 = MIN(gun2, gun1); // make sure we didn't overshoot it
+            gun2 = std::min(gun2, gun1); // make sure we didn't overshoot it
         }
         /*
         .................. Decrement current palette's color ..................
         */
         else {
             gun2 -= step;
-            gun2 = MAX(gun2, gun1); // make sure we didn't overshoot it
+            gun2 = std::max(gun2, gun1); // make sure we didn't overshoot it
         }
 
         palette[index] = (unsigned char)gun2;

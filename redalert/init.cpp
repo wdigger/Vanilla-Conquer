@@ -321,10 +321,10 @@ bool Init_Game(int, char*[])
         VisiblePage.Clear();
         //		Mono_Printf("Playing Intro\n");
         Play_Intro();
-        memset(CurrentPalette, 0x01, 768);
+        memset(CurrentPalette, 0x01, PALETTE_BYTES);
         WhitePalette.Set();
     } else {
-        memset(CurrentPalette, 0x01, 768);
+        memset(CurrentPalette, 0x01, PALETTE_BYTES);
     }
 
     /*

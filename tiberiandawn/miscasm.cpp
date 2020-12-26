@@ -50,13 +50,3 @@ void Shake_Screen(int shakes)
     // Need a different solution for shaking the screen
     shakes;
 }
-
-void Set_Palette_Range(void* palette)
-{
-    if (palette == NULL) {
-        return;
-    }
-
-    memcpy(CurrentPalette, palette, 768);
-    Set_DD_Palette(palette);
-}

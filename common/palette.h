@@ -25,44 +25,20 @@
 ;*                                                                         *
 ;*                   Start Date : April 25, 1994                           *
 ;*                                                                         *
-;*                  Last Update : April 27, 1994 [BRR]							*
+;*                  Last Update : April 27, 1994 [BRR]                     *
 ;*                                                                         *
 ;* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #ifndef PALETTE_H
 #define PALETTE_H
 
-#include "gbuffer.h"
-
-/*
-********************************* Constants *********************************
-*/
 #define RGB_BYTES     3
 #define PALETTE_SIZE  256
-#define PALETTE_BYTES 768
+#define PALETTE_BYTES (RGB_BYTES * PALETTE_SIZE)
 
-/*
-******************************** Prototypes *********************************
-*/
-/*
--------------------------------- Palette.cpp --------------------------------
-*/
+extern unsigned char CurrentPalette[PALETTE_BYTES];
+
 void Set_Palette(void* palette);
-void Set_Palette_Color(void* palette, int color, void* data);
 void Fade_Palette_To(void* palette1, unsigned int delay, void (*callback)());
 
-/*
--------------------------------- loadpal.cpp --------------------------------
-*/
-void Load_Palette(char* palette_file_name, void* palette_pointer);
-
-/*
----------------------------------- pal.asm ----------------------------------
-*/
-extern void Set_Palette_Range(void* palette);
-extern bool Bump_Color(void* palette, int changable, int target);
-extern unsigned char CurrentPalette[]; /* in pal.asm */
-
 #endif // PALETTE_H
-
-/***************************** End of palette.h ****************************/
