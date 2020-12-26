@@ -1,4 +1,3 @@
-#include "common/drawmisc.h"
 #include "common/gbuffer.h"
 
 #include <stdint.h>
@@ -40,7 +39,7 @@ int test_tobuff()
 
     if (gb.Lock()) {
         // Test assumes Fat_Put_Pixel test passes, otherwise both fail.
-        Fat_Put_Pixel(10, 10, 5, 5, gb);
+        gb.Fat_Put_Pixel(10, 10, 5, 5);
         Buffer_To_Buffer(&gb, 0, 0, 20, 20, buff, sizeof(buff));
 
         if (memcmp(buff, test_data, test_data_length) != 0) {

@@ -216,6 +216,10 @@ public:
     {
         return Pitch;
     }
+    int Get_Full_Pitch()
+    {
+        return Pitch + XAdd + Width;
+    }
     bool Get_IsDirectDraw()
     {
         return IsHardware;
@@ -332,6 +336,8 @@ public:
     /* Define functions to attach the viewport to a graphicbuffer        */
     /*===================================================================*/
     void Attach(GraphicBufferClass* graphic_buff, int x, int y, int w, int h);
+
+    void Fat_Put_Pixel(unsigned int x, unsigned int y, unsigned char color, unsigned int size);
 
 protected:
     /*===================================================================*/

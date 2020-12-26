@@ -55,6 +55,8 @@ SurfaceMonitorClass& AllSurfaces = AllSurfacesDDraw; // List of all direct draw 
 
 BOOL CanVblankSync = TRUE;
 
+HWND MainWindow = NULL; // Handle to programs main window
+
 /***********************************************************************************************
  * Process_DD_Result -- Does a message box based on the result of a DD command                 *
  *                                                                                             *

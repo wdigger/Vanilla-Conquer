@@ -1,4 +1,3 @@
-#include "common/drawmisc.h"
 #include "common/gbuffer.h"
 
 #include <stdint.h>
@@ -38,7 +37,7 @@ int test_fatpixel()
     gb.Clear();
 
     if (gb.Lock()) {
-        Fat_Put_Pixel(10, 10, 5, 5, gb);
+        gb.Fat_Put_Pixel(10, 10, 5, 5);
 
         if (memcmp(gb.Get_Buffer(), test_data, test_data_length) != 0) {
             fprintf(stderr, "Fat_Put_Pixel(10, 10, 5, 5, gb) did not generate the expected result.\n");

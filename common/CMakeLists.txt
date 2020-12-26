@@ -31,7 +31,6 @@ set(COMMON_SRC
     dipthong.cpp
     drawbuff.cpp
     drawline.cpp
-    drawmisc.cpp
     face.cpp
     fading.cpp
     field.cpp

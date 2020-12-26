@@ -57,9 +57,6 @@ extern void (*Misc_Focus_Restore_Function)(void);
 #include <windows.h>
 extern HWND MainWindow;
 #endif
-extern bool SystemToVideoBlits;
-extern bool VideoToSystemBlits;
-extern bool SystemToSystemBlits;
 extern bool OverlappedVideoBlits; // Can video driver blit overlapped regions?
 
 /*=========================================================================*/

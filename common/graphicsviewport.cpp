@@ -53,7 +53,14 @@
 
 #include <string.h>
 
-// int	CacheAllowed;
+bool AllowHardwareBlitFills = true;
+bool OverlappedVideoBlits = true; // Can video driver blit overlapped regions?
+
+/*
+** Function to call if we detect focus loss
+*/
+void (*Misc_Focus_Loss_Function)(void) = nullptr;
+void (*Misc_Focus_Restore_Function)(void) = nullptr;
 
 /*=========================================================================*/
 /* The following PRIVATE functions are in this file:                       */
@@ -1195,5 +1202,25 @@ void GraphicViewPortClass::Linear_Scale_To_Linear(GraphicViewPortClass* dst_vp,
                 }
             }
         }
+    }
+}
+
+void GraphicViewPortClass::Fat_Put_Pixel(unsigned int x, unsigned int y, unsigned char color, unsigned int size)
+{
+    if (size == 0) {
+        return;
+    }
+
+    if (y >= (unsigned)Height || x >= Width) {
+        return;
+    }
+
+    int pitch = Get_Full_Pitch();
+    char* buf = reinterpret_cast<char*>(x + pitch * y + Offset);
+    int w = size;
+
+    while (size--) {
+        memset(buf, color, w);
+        buf += pitch;
     }
 }

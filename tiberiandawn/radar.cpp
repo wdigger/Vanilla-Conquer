@@ -611,7 +611,7 @@ void RadarClass::Render_Infantry(CELL cell, int x, int y, int size)
             case RTTI_AIRCRAFT:
                 // PWG: Slowdown?
                 // if (LogicPage->Lock()){
-                Fat_Put_Pixel(x, y, ((UnitClass*)obj)->House->Class->BrightColor, size, *LogicPage);
+                LogicPage->Fat_Put_Pixel(x, y, ((UnitClass*)obj)->House->Class->BrightColor, size);
                 // LogicPage->Unlock();
                 //}
                 break;
@@ -838,13 +838,13 @@ void RadarClass::Plot_Radar_Pixel(CELL cell)
 
             } else {
                 if (LogicPage->Lock()) {
-                    Fat_Put_Pixel(x, y, cellptr->Cell_Color(false), ZoomFactor, *LogicPage);
+                    LogicPage->Fat_Put_Pixel(x, y, cellptr->Cell_Color(false), ZoomFactor);
                     LogicPage->Unlock();
                 }
             }
         } else {
             if (LogicPage->Lock()) {
-                Fat_Put_Pixel(x, y, color, ZoomFactor, *LogicPage);
+                LogicPage->Fat_Put_Pixel(x, y, color, ZoomFactor);
                 LogicPage->Unlock();
             }
         }

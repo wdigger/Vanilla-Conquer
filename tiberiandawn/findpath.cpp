@@ -1576,7 +1576,7 @@ void FootClass::Debug_Draw_Map(char* txt, CELL start, CELL dest, bool pause)
             if (XY_Cell(x, y) == dest)
                 color = BLUE;
 
-            Fat_Put_Pixel(64 + (x * 3), 8 + (y * 3), color, 3, SeenBuff);
+            SeenBuff.Fat_Put_Pixel(64 + (x * 3), 8 + (y * 3), color, 3);
         }
     }
     Set_Logic_Page(page);
