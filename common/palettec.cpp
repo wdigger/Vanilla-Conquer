@@ -43,7 +43,6 @@ void Set_Palette(void* palette);
 
 #include "palette.h"
 #include "palettec.h"
-#include "ftimer.h"
 #include "timer.h"
 #include "framelimit.h"
 

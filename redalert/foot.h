@@ -37,7 +37,7 @@
 
 #include "target.h"
 #include "techno.h"
-#include "ftimer.h"
+#include "common/timer.h"
 
 class HouseClass;
 class ObjectClass;
